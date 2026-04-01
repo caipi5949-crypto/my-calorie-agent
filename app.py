@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(page_title="AI Calorie Tracker", layout="centered")
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 # 2. Simple Data Storage (Reset on refresh for this simple version)
 if 'history' not in st.session_state:
