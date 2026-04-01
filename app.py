@@ -7,7 +7,7 @@ import pandas as pd
 st.set_page_config(page_title="AI Calorie Tracker", layout="centered")
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+model = genai.GenerativeModel('models/gemini-1.5-flash')
 
 # 2. Simple Data Storage (Reset on refresh for this simple version)
 if 'history' not in st.session_state:
@@ -39,16 +39,21 @@ col2.metric("Remaining", f"{remaining} kcal")
 user_input = st.text_input("What did you eat? (e.g., 'Big Mac and medium fries')")
 
 if user_input:
-    # Ask AI to parse the calories
-    prompt = f"How many calories are in '{user_input}'? Return ONLY the number. No text."
-    response = model.generate_content(prompt)
     try:
-        cals = int(response.text.strip())
-        st.session_state.history.append({"date": today, "item": user_input, "cals": cals})
-        st.success(f"Added {cals} calories for {user_input}!")
-        st.rerun()
-    except:
-        st.error("AI couldn't figure out the number. Try being more specific.")
+        # Ask AI to parse the calories
+        prompt = f"How many calories are in '{user_input}'? Return ONLY the number. No text."
+        response = model.generate_content(prompt)
+        
+        # New: Detailed check of what the AI actually sent back
+        if response.text:
+            cals = int(response.text.strip())
+            st.session_state.history.append({"date": today, "item": user_input, "cals": cals})
+            st.success(f"Added {cals} calories for {user_input}!")
+            st.rerun()
+    except Exception as e:
+        # This will now tell us the EXACT error instead of a generic one
+        st.error(f"AI Error: {e}")
+        st.info("Check if your API key is correct in Streamlit Secrets.")
 
 # 6. History Table
 if today_entries:
